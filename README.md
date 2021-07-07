@@ -7,7 +7,9 @@ https://agit.at/
 ![](img/agit21-logo.png ) ![](img/postgresql_postgis.png)
 
 
--> hier geht es zum Workshop https://github.com/astroidex/agit-2021-workshop-geodatenmanagement-mit-postgresql-postgis-aemde/blob/main/agit-2021-workshop-geodatenmanagement-mit-postgresql-postgis-aemde
+-> hier geht es zum Workshop 
+https://github.com/astroidex/agit-2021-workshop-geodatenmanagement-mit-postgresql-postgis-aemde/blob/main/agit-2021-workshop-geodatenmanagement-mit-postgresql-postgis-aemde.md
+
 
 ## Astrid Emde
 
