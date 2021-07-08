@@ -360,7 +360,7 @@ Der Import erfolgt über die folgenden Schritte:
 ### Übung 5: Laden von natural_earth2-Shapes in Ihre Datenbank
 
 * Importieren Sie die Datei ne_10m_admin_0_countries.shp in die Tabelle **_ne_10m_admin_0_countries_**
-* Importieren Sie die Datei ne_10m_admin_1_states_provinces_shp.shp in die Tabelle **_ne_10m_admin_1_states_provinces_shp_**
+* Importieren Sie die Datei ne_10m_admin_1_states_provinces_shp.shp in die Tabelle **_ne_10m_admin_1_states_provinces_**
 * Importieren Sie lediglich die Bundesländer von Deutschland in die Tabelle **_provinces_brd_** (nutzen Sie den Filter admin='Germany')
 * Importieren Sie die Shape-Datei ne_10m_populated_places.shp in die Tabelle **_ne_10m_populated_places_**
 * Schauen Sie sich die Metadaten-Sicht **_geometry_columns_** an
@@ -579,7 +579,7 @@ SELECT a.*
 
 * Erzeugen Sie eine Sicht **_qry_brd_union_**
 * Nutzen Sie ST_UNION http://postgis.net/docs/ST_Union.html
-* Nutzen Sie die Tabelle **_ne_10m_admin_1_states_provinces_shp_** und filtern Sie nach admin Germany (admin='Germany') 
+* Nutzen Sie die Tabelle **_ne_10m_admin_1_states_provinces_** und filtern Sie nach admin Germany (admin='Germany') 
 * Fügen Sie die Spalte **_admin_** in Ihre Sicht ein - Sie müssen GROUP BY verwenden
 * Wenden Sie typecast auf die Geometriespalte an
 * Schauen Sie sich das Ergebnis in QGIS an
@@ -587,7 +587,7 @@ SELECT a.*
 Version 1: Vereinigung der Bundesländer von Germany über ST_UNION
 ```sql
 SELECT ST_UNION(geom)
-  FROM public.ne_10m_admin_1_states_provinces_shp 
+  FROM public.ne_10m_admin_1_states_provinces 
   WHERE admin='Germany';
 ```
 
@@ -596,7 +596,7 @@ Version 2: Ausgabe der Geometrie als Text
 SELECT ROW_NUMBER() OVER() as gid, 
   admin, 
   st_AsText(ST_UNION(geom))
-  FROM public.ne_10m_admin_1_states_provinces_shp 
+  FROM public.ne_10m_admin_1_states_provinces 
   WHERE admin='Germany'
   GROUP BY admin ;
 ```
@@ -607,7 +607,7 @@ CREATE VIEW qry_brd_union AS
 SELECT 1 as gid, 
   admin, 
   ST_Multi(ST_UNION(geom))::geometry(multipolygon,4326) as geom
-  FROM public.ne_10m_admin_1_states_provinces_shp 
+  FROM public.ne_10m_admin_1_states_provinces 
   WHERE admin='Germany'
   GROUP BY admin ;
 ```
@@ -628,7 +628,7 @@ CREATE TABLE provinces_subdivided AS
   name, 
   admin, 
   st_subdivide(geom) AS geom
-  FROM ne_10m_admin_1_states_provinces_shp;
+  FROM ne_10m_admin_1_states_provinces;
 
 ALTER TABLE provinces_subdivided ADD COLUMN gid serial PRIMARY KEY;
 ```
@@ -642,7 +642,7 @@ CREATE TABLE provinces_subdivided AS
   name, 
   admin, 
   st_subdivide(geom,20) AS geom
-  FROM ne_10m_admin_1_states_provinces_shp ;
+  FROM ne_10m_admin_1_states_provinces ;
 
 ALTER TABLE provinces_subdivided ADD COLUMN gid serial PRIMARY KEY;
 ```
@@ -699,7 +699,7 @@ Funktion, die die Originaldaten (Provinzen) nutzt
 ```sql
 CREATE OR REPLACE FUNCTION getCountryname(mygeometry geometry) 
  RETURNS character varying 
- AS 'SELECT c.name FROM ne_10m_admin_1_states_provinces_shp c 
+ AS 'SELECT c.name FROM ne_10m_admin_1_states_provinces c 
  WHERE st_intersects(c.geom,$1);' 
 LANGUAGE 'sql'; 
 ```
@@ -723,7 +723,7 @@ PostgreSQL unterstützt Rollen (Benutzer mit Login und Rollen ohne Login). Diese
 1. Legen Sie die Rollen **workshop_read** und **workshop_writer** an
 2. Legen Sie die Login-Rolle **robert** mit Passwort an und fügen Sie diese zur Gruppe **workshop_reader** hinzu
 3. Legen Sie die Login-Rolle **wilma** an und fügen Sie diese zur Gruppe **workshop_writer** hinzu
-4. Geben Sie der Gruppe **workshop_reader** Leserechte auf die Tabelle **_ne_10m_admin_1_states_provinces_shp_**
+4. Geben Sie der Gruppe **workshop_reader** Leserechte auf die Tabelle **_ne_10m_admin_1_states_provinces_**
 5. Geben Sie der Gruppe **workshop_writer** Schreibrechte auf die Tabelle **_cities_**
 6. Testen Sie den lesenden und schreibenden Zugriff über QGIS 
 
@@ -737,9 +737,9 @@ GRANT workshop_reader TO robert;
 CREATE ROLE wilma WITH LOGIN PASSWORD 'fossgis';
 GRANT workshop_writer TO wilma;
 
-GRANT SELECT ON ne_10m_admin_1_states_provinces_shp TO workshop_reader;
+GRANT SELECT ON ne_10m_admin_1_states_provinces TO workshop_reader;
 -- Wechseln Sie in die Rolle robert
-Select * from ne_10m_admin_1_states_provinces_shp;
+Select * from ne_10m_admin_1_states_provinces;
 
 GRANT ALL ON cities to workshop_writer;
 GRANT USAGE ON SEQUENCE cities_gid_seq TO workshop_writer;
